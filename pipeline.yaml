@@ -1,0 +1,32 @@
+pipeline:
+  agent: any
+  environment:
+    # Путь к файлу SSH-ключа (создан как Secret file или SSH ключ)
+    KEY_PATH: credentials('ivanov')
+    # Имя JAR-файла
+    JAR_NAME: "CurrencyConverterBot-1.0-SNAPSHOT-jar-with-dependencies.jar"
+    # Шаблон Heat для создания стека (файл должен быть в репозитории)
+    STACK_TEMPLATE: "instance.yaml"
+    # Имя стека в OpenStack
+    STACK_NAME: "s-2025-ivanov"
+    # Адрес сервера для деплоя (IP инстанса)
+    DEPLOY_SERVER: "192.168.199.99"
+    # Путь, куда копировать артефакт на сервере
+    REMOTE_DEPLOY_PATH: "/home/ubuntu/deploy/"
+  stages:
+    - stage: Checkout
+      steps:
+        - checkout:
+            scm: git
+            url: "https://github.com/michailivanov/infra-heat-stack"  # URL вашего Git-репозитория
+    - stage: Create Instance via Heat
+      steps:
+        - sh: >
+            openstack stack create -t ${STACK_TEMPLATE} ${STACK_NAME}
+    - stage: Deploy Artifact
+      steps:
+        - sh: |
+            # Копирование JAR-файла на удалённый сервер
+            scp -i "${KEY_PATH}" ${JAR_NAME} ubuntu@${DEPLOY_SERVER}:${REMOTE_DEPLOY_PATH}
+            # Перезапуск сервиса на удалённом сервере
+            ssh -i "${KEY_PATH}" ubuntu@${DEPLOY_SERVER} "sudo systemctl restart myapp"
