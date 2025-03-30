@@ -54,10 +54,18 @@
     terraform_path: tf
   tasks:
     - block:
-      - name: Add OpenJDK 21 repository
-        apt_repository:
-          repo: "ppa:openjdk-r/ppa"
+      - name: Add OpenJDK GPG key (без PPA)
+        apt_key:
+          url: "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xF7C313DB11F1ED148BB5117C08B3810CB7017B89"
           state: present
+        become: yes
+
+      - name: Add OpenJDK 21 repository manually
+        apt_repository:
+          repo: "deb [arch=amd64] https://ppa.launchpadcontent.net/openjdk-r/ppa/ubuntu {{ ansible_distribution_release }} main"
+          state: present
+          filename: "openjdk-21"  # Создает /etc/apt/sources.list.d/openjdk-21.list
+        become: yes
             
       - name: Install JDK
         apt:
