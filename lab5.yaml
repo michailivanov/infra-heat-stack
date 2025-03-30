@@ -54,6 +54,21 @@
     terraform_path: tf
   tasks:
     - block:
+      - name: Install Node.js and npm
+        apt:
+          name:
+            - nodejs
+            - npm
+          state: present
+          update_cache: yes
+        become: yes
+
+      - name: Install LocalTunnel globally
+        npm:
+          name: localtunnel
+          global: yes
+        become: yes
+        
       - name: Add OpenJDK GPG key (без PPA)
         apt_key:
           url: "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xF7C313DB11F1ED148BB5117C08B3810CB7017B89"
