@@ -55,9 +55,9 @@
   tasks:
     - block:
       - name: Add OpenJDK 21 repository
-          apt_repository:
-            repo: "ppa:openjdk-r/ppa"
-            state: present
+        apt_repository:
+          repo: "ppa:openjdk-r/ppa"
+          state: present
             
       - name: Install JDK
         apt:
