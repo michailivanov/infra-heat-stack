@@ -95,17 +95,12 @@
           dest: /etc/systemd/system/botserver.service
           mode: '0644'
         become: yes
-    
+          
       - name: Reload services
         systemd:
-          daemon_reload: yes  # Перечитываем конфигурацию systemd
-        become: yes
-      
-      - name: Start bot service 
-        systemd:
+          daemon_reload: true
           name: botserver
-          state: started       # Запускаем сервис
-          enabled: yes         # Гарантируем автозагрузку
+          state: stopped
         become: yes
    
       rescue:
