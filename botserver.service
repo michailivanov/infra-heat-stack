@@ -1,0 +1,26 @@
+[Unit]
+Description=Currency Converter Bot with LocalTunnel
+After=network.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu
+Environment="PORT=8081"
+Environment="SUBDOMAIN=mybot"
+
+# Запуск в фоне через bash
+ExecStart=/bin/bash -c 'lt --port ${PORT} --subdomain ${SUBDOMAIN} > /home/ubuntu/lt.log 2>&1 & sleep 10 & \
+                       java -jar /home/ubuntu/bot.jar > /home/ubuntu/bot.log 2>&1'
+
+# Команды остановки
+ExecStop=/usr/bin/pkill -f "java -jar /home/ubuntu/bot.jar"
+ExecStopPost=/usr/bin/pkill -f "lt --port ${PORT} --subdomain ${SUBDOMAIN}"
+
+# Настройки перезапуска
+Restart=always
+RestartSec=10
+StartLimitInterval=60s
+StartLimitBurst=3
+
+[Install]
+WantedBy=multi-user.target
