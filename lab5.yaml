@@ -84,7 +84,6 @@
       - name: Reload services
         systemd:
           daemon_reload: yes  # Перечитываем конфигурацию systemd
-          enabled: yes        # Включаем автозагрузку при старте системы
         become: yes
       
       - name: Start bot service 
