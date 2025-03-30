@@ -78,14 +78,20 @@
         copy:
           src: "{{ service_path }}"
           dest: /etc/systemd/system/botserver.service
-          mode: '0777'
+          mode: '0644'
         become: yes
     
       - name: Reload services
         systemd:
-          daemon_reload: true
+          daemon_reload: yes  # Перечитываем конфигурацию systemd
+          enabled: yes        # Включаем автозагрузку при старте системы
+        become: yes
+      
+      - name: Start bot service 
+        systemd:
           name: botserver
-          state: stopped
+          state: started       # Запускаем сервис
+          enabled: yes         # Гарантируем автозагрузку
         become: yes
    
       rescue:
