@@ -37,26 +37,35 @@
         path: ~/.config/ycloud/config.yaml
       register: yc_configured
 
+    - name: Make yc_vars.sh executable
+      file:
+        path: "{{ playbook_dir }}/tf-yandex/yc_vars.sh"
+        mode: "0755"
+
+    - name: Get Yandex Cloud credentials from yc_vars.sh
+      shell: "{{ playbook_dir }}/tf-yandex/yc_vars.sh"
+      register: yc_vars_output
+      changed_when: false
+      when: not yc_configured.stat.exists
+
+    - name: Parse YC credentials
+      set_fact:
+        yc_token: "{{ (yc_vars_output.stdout | from_json).token }}"
+        yc_cloud_id: "{{ (yc_vars_output.stdout | from_json).cloud_id }}"
+        yc_folder_id: "{{ (yc_vars_output.stdout | from_json).folder_id }}"
+      when: not yc_configured.stat.exists and yc_vars_output is defined
+
     - name: Initialize YC CLI (if not configured)
       shell: |
-        if ! yc config list >/dev/null 2>&1; then
-          yc init
-        fi
-      environment:
-        YC_TOKEN: "{{ vault_yc_token }}"
-        YC_CLOUD_ID: "{{ vault_yc_cloud_id }}"
-        YC_FOLDER_ID: "{{ vault_yc_folder_id }}"
-      when: not yc_configured.stat.exists
+        yc config set token "{{ yc_token }}"
+        yc config set cloud-id "{{ yc_cloud_id }}"
+        yc config set folder-id "{{ yc_folder_id }}"
+      when: not yc_configured.stat.exists and yc_token is defined and yc_cloud_id is defined and yc_folder_id is defined
 
     - name: Verify YC CLI authentication
       command: yc iam create-token
       register: yc_token_test
       changed_when: false
-
-    - name: Make yc_vars.sh executable
-      file:
-        path: "{{ playbook_dir }}/tf-yandex/yc_vars.sh"
-        mode: "0755"
 
     - name: Test yc_vars.sh
       command: "{{ playbook_dir }}/tf-yandex/yc_vars.sh"
@@ -99,7 +108,7 @@
   tasks:
     - name: Wait for a ssh port become available
       wait_for:
-        host: "{{ trfrm.outputs.servers.value.serverip }}"
+        host: "{{ hostvars.localhost.trfrm.outputs.servers.value.serverip }}"
         port: 22
 
 - name: Prepare production for deploy
