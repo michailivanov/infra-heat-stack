@@ -5,6 +5,11 @@
     terraform_rc_path: .terraformrc
     terraform_path: ./tf-yandex
   tasks:
+    - name: Set executable permissions for yc_vars.sh
+      ansible.builtin.file:
+        path: "{{ playbook_dir }}/tf-yandex/yc_vars.sh"
+        mode: "0755"  # rwxr-xr-x
+        state: file
     - name: Prepare TF (set yandex mirror)
       copy:
         src: "{{ terraform_rc_path }}"
