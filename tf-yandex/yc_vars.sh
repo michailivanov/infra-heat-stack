@@ -1,31 +1,18 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-# Получение IAM-токена для аутентификации в Yandex Cloud
-# Команда 'yc iam create-token' создает новый IAM-токен
-# Результат сохраняется в переменной YC_TOKEN
-YC_TOKEN=$($HOME/yandex-cloud/bin/yc iam create-token)
+# Получаем данные для аутентификации
+YC_TOKEN=$(yc iam create-token 2>/dev/null)
+YC_CLOUD_ID=$(yc config get cloud-id 2>/dev/null)
+YC_FOLDER_ID=$(yc config get folder-id 2>/dev/null)
 
-# Получение идентификатора облака (cloud-id) из конфигурации YC CLI
-# Команда 'yc config get cloud-id' возвращает текущий cloud-id
-# Результат сохраняется в переменной YC_CLOUD_ID
-YC_CLOUD_ID=$($HOME/yandex-cloud/bin/yc config get cloud-id)
-
-# Получение идентификатора каталога (folder-id) из конфигурации YC CLI
-# Команда 'yc config get folder-id' возвращает текущий folder-id
-# Результат сохраняется в переменной YC_FOLDER_ID
-YC_FOLDER_ID=$($HOME/yandex-cloud/bin/yc config get folder-id)
-
-# Формирование JSON-объекта с полученными данными с помощью утилиты jq
-echo $(jq --null-input \          # Создание JSON из пустого ввода
-          --arg token "$YC_TOKEN" \        # Передача токена как аргумента
-          --arg cloud_id "$YC_CLOUD_ID" \  # Передача cloud_id как аргумента
-          --arg folder_id "$YC_FOLDER_ID" \ # Передача folder_id как аргумента
-          '{"token": $token, "cloud_id": $cloud_id, "folder_id": $folder_id}' # Шаблон JSON
-          )
-
-# Итоговый вывод будет выглядеть так:
-# {
-#   "token": "t1.9euelZq...",
-#   "cloud_id": "b1gvm...",
-#   "folder_id": "b1g88..."
-# }
+# Формируем JSON ответ
+if [ -n "$YC_TOKEN" ] && [ -n "$YC_CLOUD_ID" ] && [ -n "$YC_FOLDER_ID" ]; then
+  jq -n \
+    --arg token "$YC_TOKEN" \
+    --arg cloud_id "$YC_CLOUD_ID" \
+    --arg folder_id "$YC_FOLDER_ID" \
+    '{"token": $token, "cloud_id": $cloud_id, "folder_id": $folder_id}'
+else
+  echo "Ошибка: не удалось получить данные аутентификации" >&2
+  exit 1
+fi
