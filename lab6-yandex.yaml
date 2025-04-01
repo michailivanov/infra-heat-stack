@@ -1,6 +1,7 @@
 - name: Create production server
   hosts: localhost
   connection: local
+  become: yes
   vars:
     terraform_rc_path: .terraformrc
     terraform_path: ./tf-yandex
