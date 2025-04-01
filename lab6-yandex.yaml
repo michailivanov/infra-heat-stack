@@ -32,6 +32,11 @@
             state: present
             regexp: '^PATH='
 
+    - name: Check if YC CLI is already configured
+      stat:
+        path: ~/.config/ycloud/config.yaml
+      register: yc_configured
+
     - name: Initialize YC CLI (if not configured)
       shell: |
         if ! yc config list >/dev/null 2>&1; then
