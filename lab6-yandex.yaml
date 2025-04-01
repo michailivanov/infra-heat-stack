@@ -11,9 +11,6 @@
         dest: ~/.terraformrc
 
     - name: Run terraform
-      environment:
-        TF_VAR_user_name: "{{ lookup('env', 'TF_VAR_user_name') }}"
-        TF_VAR_password: "{{ lookup('env', 'TF_VAR_password') }}"
       terraform:
         project_path: "{{ terraform_path }}"
         force_init: yes
