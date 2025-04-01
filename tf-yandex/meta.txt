@@ -1,0 +1,26 @@
+# cloud-config файл, который используется cloud-init для начальной настройки
+# облачных серверов при их первом запуске.
+
+# Основной ключ cloud-config, определяющий конфигурацию пользователей
+users:
+  # Список пользователей для создания
+  - name: ubuntu          # Имя создаваемого пользователя
+    groups: sudo          # Группы, в которые будет добавлен пользователь (sudo - для прав администратора)
+    shell: /bin/bash      # Используемая командная оболочка (Bash)
+    
+    # Настройки sudo для этого пользователя:
+    sudo: 'ALL=(ALL) NOPASSWD:ALL'
+    # Разрешает:
+    # - ALL - любые команды
+    # - (ALL) - от имени любого пользователя
+    # - NOPASSWD:ALL - без запроса пароля для всех команд
+    
+    # Список авторизованных SSH-ключей для этого пользователя
+    ssh_authorized_keys:
+      # Публичный SSH-ключ в формате ed25519
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDTLhLlU1sJ39/SsIgLBgcq+mJUCEQ4FVJSnwR225u45qjbfGMTfll2UkTIQQkEje3RfEVI8v930G4YLJ8ub028xtaohzzdHR8nkYTFNXoebdfAHiDDUxEN/uGg32Wm/Nu5VgnEExfSe+LgHkp2/Qsuraj9weFWxt9Uk17/KCjf89IRzNIq48C+attq0nVJR69nljwtHLG+kDv7HYCp3EUL9iZz9hZA3lxgDUiFxWacUwUokmh+I6joxx9ZYXFTtGUv/yzS3SXs4cvMDqn1PXscuOSfmRRhnIzz2PjQhBKWJ1I1wYwZigh0S7kEF3kgNugpXRKYBpcZug+2WMju3BDP Generated-by-Nova
+
+      # Формат ключа:
+      # алгоритм ключа
+      # ключ
+      # комментарий
