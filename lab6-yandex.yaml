@@ -5,11 +5,58 @@
     terraform_rc_path: .terraformrc
     terraform_path: ./tf-yandex
   tasks:
-    - name: Set executable permissions for yc_vars.sh
-      ansible.builtin.file:
+    - name: Install required packages
+      apt:
+        name: ["curl", "jq", "unzip"]
+        state: present
+        update_cache: yes
+
+    - name: Install Yandex Cloud CLI
+      block:
+        - name: Download yc installer
+          get_url:
+            url: https://storage.yandexcloud.net/yandexcloud-yc/install.sh
+            dest: /tmp/install-yc.sh
+            mode: '0755'
+
+        - name: Run installer
+          command: /bin/bash /tmp/install-yc.sh
+          args:
+            creates: /usr/local/bin/yc
+
+        - name: Ensure yc is in PATH
+          lineinfile:
+            path: /etc/environment
+            line: 'PATH="/usr/local/bin:$PATH"'
+            state: present
+            regexp: '^PATH='
+
+    - name: Initialize YC CLI (if not configured)
+      shell: |
+        if ! yc config list >/dev/null 2>&1; then
+          yc init
+        fi
+      environment:
+        YC_TOKEN: "{{ vault_yc_token }}"
+        YC_CLOUD_ID: "{{ vault_yc_cloud_id }}"
+        YC_FOLDER_ID: "{{ vault_yc_folder_id }}"
+      when: not yc_configured.stat.exists
+
+    - name: Verify YC CLI authentication
+      command: yc iam create-token
+      register: yc_token_test
+      changed_when: false
+
+    - name: Make yc_vars.sh executable
+      file:
         path: "{{ playbook_dir }}/tf-yandex/yc_vars.sh"
-        mode: "0755"  # rwxr-xr-x
-        state: file
+        mode: "0755"
+
+    - name: Test yc_vars.sh
+      command: "{{ playbook_dir }}/tf-yandex/yc_vars.sh"
+      register: yc_vars_test
+      changed_when: false
+
     - name: Prepare TF (set yandex mirror)
       copy:
         src: "{{ terraform_rc_path }}"
