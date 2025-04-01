@@ -37,52 +37,67 @@
         path: ~/.config/ycloud/config.yaml
       register: yc_configured
 
-    - name: Make yc_vars.sh executable
+    # Option 1: Direct initialization using variables from Jenkins credentials
+    - name: Create YC config directory
       file:
-        path: "{{ playbook_dir }}/tf-yandex/yc_vars.sh"
-        mode: "0755"
-
-    - name: Get Yandex Cloud credentials from yc_vars.sh
-      shell: "{{ playbook_dir }}/tf-yandex/yc_vars.sh"
-      register: yc_vars_output
-      changed_when: false
+        path: ~/.config/yandex-cloud
+        state: directory
+        mode: '0755'
       when: not yc_configured.stat.exists
 
-    - name: Parse YC credentials
-      set_fact:
-        yc_token: "{{ (yc_vars_output.stdout | from_json).token }}"
-        yc_cloud_id: "{{ (yc_vars_output.stdout | from_json).cloud_id }}"
-        yc_folder_id: "{{ (yc_vars_output.stdout | from_json).folder_id }}"
-      when: not yc_configured.stat.exists and yc_vars_output is defined
+    - name: Initialize YC CLI with explicit token (Jenkins approach)
+      block:
+        - name: Check if Jenkins environment variables are available
+          set_fact:
+            yc_token: "{{ lookup('env', 'YC_TOKEN') }}"
+            yc_cloud_id: "{{ lookup('env', 'YC_CLOUD_ID') }}"
+            yc_folder_id: "{{ lookup('env', 'YC_FOLDER_ID') }}"
+          
+        - name: Create YC config file
+          copy:
+            dest: ~/.config/yandex-cloud/config.yaml
+            content: |
+              current: default
+              profiles:
+                default:
+                  token: "{{ yc_token }}"
+                  cloud-id: "{{ yc_cloud_id }}"
+                  folder-id: "{{ yc_folder_id }}"
+            mode: '0600'
+          when: yc_token != '' and yc_cloud_id != '' and yc_folder_id != ''
+      when: not yc_configured.stat.exists
 
-    - name: Initialize YC CLI (if not configured)
+    # Option 2: Alternative direct commands to configure YC CLI
+    - name: Configure YC CLI manually using Jenkins variables
       shell: |
-        yc config set token "{{ yc_token }}"
-        yc config set cloud-id "{{ yc_cloud_id }}"
-        yc config set folder-id "{{ yc_folder_id }}"
-      when: not yc_configured.stat.exists and yc_token is defined and yc_cloud_id is defined and yc_folder_id is defined
+        yc config profile create default
+        yc config set token "{{ lookup('env', 'YC_TOKEN') }}"
+        yc config set cloud-id "{{ lookup('env', 'YC_CLOUD_ID') }}"
+        yc config set folder-id "{{ lookup('env', 'YC_FOLDER_ID') }}"
+      when: not yc_configured.stat.exists and lookup('env', 'YC_TOKEN') != '' and lookup('env', 'YC_CLOUD_ID') != '' and lookup('env', 'YC_FOLDER_ID') != ''
 
     - name: Verify YC CLI authentication
       command: yc iam create-token
       register: yc_token_test
       changed_when: false
-
-    - name: Test yc_vars.sh
-      command: "{{ playbook_dir }}/tf-yandex/yc_vars.sh"
-      register: yc_vars_test
-      changed_when: false
+      ignore_errors: yes
 
     - name: Prepare TF (set yandex mirror)
       copy:
         src: "{{ terraform_rc_path }}"
         dest: ~/.terraformrc
 
+    # Option 3: Use environment variables directly with terraform
     - name: Run terraform
       terraform:
         project_path: "{{ terraform_path }}"
         force_init: yes
         state: present
       register: trfrm
+      environment:
+        YC_TOKEN: "{{ lookup('env', 'YC_TOKEN') }}"
+        YC_CLOUD_ID: "{{ lookup('env', 'YC_CLOUD_ID') }}"
+        YC_FOLDER_ID: "{{ lookup('env', 'YC_FOLDER_ID') }}"
 
     - name: Export server IP up
       lineinfile:
