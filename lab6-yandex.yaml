@@ -10,6 +10,12 @@
         src: "{{ terraform_rc_path }}"
         dest: ~/.terraformrc
 
+    - name: Set proper permissions for yc_vars.sh
+      file:
+        path: "{{ terraform_path }}/yc_vars.sh"
+        mode: '0755'
+      become: no
+
     - name: Run terraform
       environment:
         TF_VAR_user_name: "{{ lookup('env', 'TF_VAR_user_name') }}"
