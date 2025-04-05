@@ -5,4 +5,4 @@ users:
     shell: /bin/bash
     sudo: 'ALL=(ALL) NOPASSWD:ALL'
     ssh_authorized_keys:
-      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDTLhLlU1sJ39/SsIgLBgcq+mJUCEQ4FVJSnwR225u45qjbfGMTfll2UkTIQQkEje3RfEVI8v930G4YLJ8ub028xtaohzzdHR8nkYTFNXoebdfAHiDDUxEN/uGg32Wm/Nu5VgnEExfSe+LgHkp2/Qsuraj9weFWxt9Uk17/KCjf89IRzNIq48C+attq0nVJR69nljwtHLG+kDv7HYCp3EUL9iZz9hZA3lxgDUiFxWacUwUokmh+I6joxx9ZYXFTtGUv/yzS3SXs4cvMDqn1PXscuOSfmRRhnIzz2PjQhBKWJ1I1wYwZigh0S7kEF3kgNugpXRKYBpcZug+2WMju3BDP Generated-by-Nova
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICyvR8j7TtNNnFRGiabZgQpB0ZmGEwYTS3eWFoSsFBB6 your_email@example.com
