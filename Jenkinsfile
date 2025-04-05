@@ -22,7 +22,7 @@ pipeline {
                 stage('Prepare infrastructure for CurrencyConverterBot') {
                     steps {
                         build(job: 'ivanov-infra-ansible-dev')
-                        loadVarsFromFile('/home/jenkins/myenv')
+                        loadVarsFromFile('/home/ubuntu/myenv')
                     }
                 }
             }
