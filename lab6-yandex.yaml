@@ -10,6 +10,15 @@
         src: "{{ terraform_rc_path }}"
         dest: ~/.terraformrc
 
+    - name: Initialize Terraform
+      command: terraform init -upgrade
+      args:
+        chdir: "{{ terraform_path }}"  # Укажите путь к директории с Terraform-конфигами
+      environment:
+        TF_VAR_yc_token: "{{ lookup('env', 'YC_TOKEN') }}"
+        TF_VAR_yc_cloud_id: "{{ lookup('env', 'YC_CLOUD_ID') }}"
+        TF_VAR_yc_folder_id: "{{ lookup('env', 'YC_FOLDER_ID') }}"
+
     - name: Set proper permissions for yc_vars.sh
       file:
         path: "{{ terraform_path }}/yc_vars.sh"
