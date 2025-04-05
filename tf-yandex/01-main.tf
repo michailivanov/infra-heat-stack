@@ -69,21 +69,19 @@ resource "yandex_vpc_subnet" "subnet-1" {
   v4_cidr_blocks = ["192.168.60.0/24"]     # Диапазон свободен
 }
 
-# Группа безопасности (корректно)
 resource "yandex_vpc_security_group" "group1" {
   name        = "ivanov-security-group"
   network_id  = data.yandex_vpc_network.existing.id
-  description = "Security group for Ivanov VM" 
+  description = "Security group for Ivanov VM"
 }
 
-# Правило SSH
 resource "yandex_vpc_security_group_rule" "ssh-rule" {
-  security_group_id = yandex_vpc_security_group.group1.id 
+  security_group_id = yandex_vpc_security_group.group1.id
   direction         = "ingress"
-  description       = "Allow SSH to Ivanov VM"
+  description       = "Allow SSH access"
   protocol          = "TCP"
   port              = 22
-  v4_cidr_blocks    = ["0.0.0.0/0"]  # Разрешаем SSH со всех IP.
+  v4_cidr_blocks    = ["0.0.0.0/0"] 
 }
 
 # Вывод IP-адресов
