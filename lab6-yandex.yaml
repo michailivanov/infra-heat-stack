@@ -3,7 +3,7 @@
   connection: local
   vars:
     terraform_rc_path: .terraformrc
-    terraform_path: ./tf-yandex
+    terraform_path: /home/ubuntu/jenkins/workspace/ivanov-infra-ansible-prod/tf-yandex
   tasks:
     - name: Prepare TF (set yandex mirror)
       copy:
@@ -78,7 +78,6 @@
           update_cache: yes
         become: yes
         async: 300  # 5 минут максимум
-        poll: 5     # Проверка каждые 5 секунд
         
       - name: Install Node.js and npm
         apt:
