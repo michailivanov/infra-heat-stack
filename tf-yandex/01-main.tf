@@ -20,8 +20,8 @@ provider "yandex" {
 }
 
 # Создание загрузочного диска для виртуальной машины
-resource "yandex_compute_disk" "boot-disk-1" {
-  name     = "boot-disk-1"                  # Имя диска
+resource "yandex_compute_disk" "boot-disk-ivanov" {
+  name     = "boot-disk-ivanov"                  # Имя диска
   type     = "network-hdd"                  # Тип диска (сетевой HDD)
   zone     = "ru-central1-a"                # Зона размещения
   size     = "20"                           # Размер диска в GB
@@ -30,7 +30,7 @@ resource "yandex_compute_disk" "boot-disk-1" {
 
 # Создание виртуальной машины
 resource "yandex_compute_instance" "vm-1" {
-  name = "kondraev-terraform"               # Имя ВМ
+  name = "ivanov-terraform"               # Имя ВМ
 
   # Ресурсы ВМ
   resources {
@@ -40,7 +40,7 @@ resource "yandex_compute_instance" "vm-1" {
 
   # Загрузочный диск
   boot_disk {
-    disk_id = yandex_compute_disk.boot-disk-1.id  # Используем созданный ранее диск
+    disk_id = yandex_compute_disk.boot-disk-ivanov.id  # Используем созданный ранее диск
   }
 
   # Сетевой интерфейс
@@ -56,41 +56,41 @@ resource "yandex_compute_instance" "vm-1" {
   }
 }
 
-# Создание облачной сети
-resource "yandex_vpc_network" "network-1" {
-  name = "network1"  # Имя сети
+# Получение данных о существующей сети
+data "yandex_vpc_network" "existing" {
+  name = "default" 
 }
 
-# Создание подсети в сети
+# Создание подсети
 resource "yandex_vpc_subnet" "subnet-1" {
-  name           = "subnet1"                     # Имя подсети
-  zone           = "ru-central1-a"               # Зона размещения
-  network_id     = yandex_vpc_network.network-1.id  # ID родительской сети
-  v4_cidr_blocks = ["192.168.10.0/24"]           # Диапазон IP-адресов подсети
+  name           = "ivanov-subnet"
+  zone           = "ru-central1-a"
+  network_id     = data.yandex_vpc_network.existing.id  # Используем полученный ID сети
+  v4_cidr_blocks = ["192.168.60.0/24"]     # Диапазон свободен
 }
 
-# Создание группы безопасности
+# Группа безопасности (корректно)
 resource "yandex_vpc_security_group" "group1" {
-  name        = "mhq-security-group"            # Имя группы безопасности
-  network_id  = yandex_vpc_network.network-1.id # ID сети, к которой привязана группа
+  name        = "ivanov-security-group"
+  network_id  = data.yandex_vpc_network.existing.id
+  description = "Security group for Ivanov VM" 
 }
 
-# Создание правила в группе безопасности для SSH
+# Правило SSH
 resource "yandex_vpc_security_group_rule" "ssh-rule" {
-  security_group_binding = yandex_vpc_security_group.group1.id  # ID группы безопасности
-  direction              = "ingress"             # Входящий трафик
-  description            = "mhq ssh"            # Описание правила
-  v4_cidr_blocks         = ["0.0.0.0/32"]       # Разрешенные IP-адреса (0.0.0.0/32 означает фактически "ничего")
-  port                   = 22                   # Порт SSH
-  protocol               = "TCP"                # Протокол TCP
+  security_group_id = yandex_vpc_security_group.group1.id 
+  direction         = "ingress"
+  description       = "Allow SSH to Ivanov VM"
+  protocol          = "TCP"
+  port              = 22
+  v4_cidr_blocks    = ["0.0.0.0/0"]  # Разрешаем SSH со всех IP.
 }
 
-# Вывод внутреннего IP-адреса созданной ВМ
+# Вывод IP-адресов
 output "internal_ip_address_vm_1" {
   value = yandex_compute_instance.vm-1.network_interface.0.ip_address
 }
 
-# Вывод внешнего IP-адреса созданной ВМ
 output "external_ip_address_vm_1" {
   value = yandex_compute_instance.vm-1.network_interface.0.nat_ip_address
 }
