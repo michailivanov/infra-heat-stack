@@ -5,7 +5,7 @@ terraform {
     yandex = {
       # Используем официальный провайдер Yandex Cloud
       source = "yandex-cloud/yandex"
-      version = ">= 0.84.0" 
+      version = "=0.83.0" 
     }
   }
   # Минимальная требуемая версия Terraform
@@ -78,7 +78,7 @@ resource "yandex_vpc_security_group" "group1" {
 
 # Создание правила для SSH (исправленная версия)
 resource "yandex_vpc_security_group_rule" "ssh-rule" {
-  security_group_id = yandex_vpc_security_group.group1.id 
+  security_group_binding = yandex_vpc_security_group.group1.id 
   direction         = "ingress"
   description       = "Allow SSH access"
   protocol          = "TCP"
