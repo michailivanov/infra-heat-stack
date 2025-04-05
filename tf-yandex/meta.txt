@@ -1,4 +1,8 @@
 #cloud-config
+apt:
+  primary:
+    - arches: [default]
+      uri: http://mirror.yandex.ru/ubuntu
 users:
   - name: ubuntu
     groups: sudo
