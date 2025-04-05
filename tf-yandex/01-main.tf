@@ -5,6 +5,7 @@ terraform {
     yandex = {
       # Используем официальный провайдер Yandex Cloud
       source = "yandex-cloud/yandex"
+      version = ">= 0.84.0" 
     }
   }
   # Минимальная требуемая версия Terraform
@@ -52,7 +53,6 @@ resource "yandex_compute_instance" "vm-1" {
   # Метаданные ВМ
   metadata = {
     user-data = "${file("meta.txt")}"  # Загружаем пользовательские данные из файла meta.txt
-                                      # (обычно содержит cloud-init конфигурацию)
   }
 }
 
@@ -66,7 +66,7 @@ resource "yandex_vpc_subnet" "subnet-1" {
   name           = "ivanov-subnet"
   zone           = "ru-central1-a"
   network_id     = data.yandex_vpc_network.existing.id  # Используем полученный ID сети
-  v4_cidr_blocks = ["192.168.60.0/24"]     # Диапазон свободен
+  v4_cidr_blocks = ["192.168.60.0/24"]    
 }
 
 # Создание группы безопасности
