@@ -11,18 +11,11 @@ terraform {
   required_version = ">= 0.13"
 }
 
-# Внешний источник данных для аутентификации в Yandex Cloud
-data "external" "ya_auth" {
-  # Запускаем bash-скрипт yc_vars.sh для получения учетных данных
-  program = [
-    "bash", "yc_vars.sh",
-  ]
-  # query может использоваться для передачи входных данных в скрипт,
-  # но в текущей версии входные данные передаются как JSON
-  query = {
-    # Можно передать что-то в STDIN программы,
-    # но сейчас не используется
-  }
+provider "yandex" {
+  token     = var.yc_token
+  cloud_id  = var.yc_cloud_id
+  folder_id = var.yc_folder_id
+  zone      = "ru-central1-a"
 }
 
 # Настройка провайдера Yandex Cloud
