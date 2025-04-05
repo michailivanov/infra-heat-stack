@@ -29,7 +29,7 @@ pipeline {
         }
         stage('Deploy CurrencyConverterBot') {    
             steps {
-                build(job: 'ivanov-deploy-dev', parameters: [string(name: 'SERVER_ADDRESS', value: env.DEV_SERVER_IP)])
+                build(job: 'ivanov-deploy-dev', parameters: [string(name: 'SERVER_ADDRESS', value: env.DEPLOYMENT_SERVER_IP)])
             }
         }
     }
