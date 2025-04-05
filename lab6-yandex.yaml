@@ -1,78 +1,24 @@
 - name: Create production server
   hosts: localhost
   connection: local
-  become: yes
   vars:
     terraform_rc_path: .terraformrc
     terraform_path: ./tf-yandex
   tasks:
-    - name: Install required packages
-      apt:
-        name: ["curl", "jq", "unzip"]
-        state: present
-        update_cache: yes
-
-    - name: Install Yandex Cloud CLI
-      block:
-        - name: Download yc installer
-          get_url:
-            url: https://storage.yandexcloud.net/yandexcloud-yc/install.sh
-            dest: /tmp/install-yc.sh
-            mode: '0755'
-
-        - name: Run installer
-          command: /bin/bash /tmp/install-yc.sh
-          args:
-            creates: /usr/local/bin/yc
-
-        - name: Ensure yc is in PATH
-          lineinfile:
-            path: /etc/environment
-            line: 'PATH="/usr/local/bin:/home/ubuntu/yandex-cloud/bin:$PATH"'
-            state: present
-            regexp: '^PATH='
-
-    - name: Check if YC CLI is already configured
-      stat:
-        path: ~/.config/yandex-cloud/config.yaml
-      register: yc_configured
-
-    - name: Create YC config directory
-      file:
-        path: ~/.config/yandex-cloud
-        state: directory
-        mode: '0755'
-      when: not yc_configured.stat.exists
-
-    - name: Create YC config file
-      copy:
-        dest: ~/.config/yandex-cloud/config.yaml
-        content: |
-          current: default
-          profiles:
-            default:
-              token: "{{ lookup('env', 'YC_TOKEN') }}"
-              cloud-id: "{{ lookup('env', 'YC_CLOUD_ID') }}"
-              folder-id: "{{ lookup('env', 'YC_FOLDER_ID') }}"
-        mode: '0600'
-      when: not yc_configured.stat.exists and lookup('env', 'YC_TOKEN') != '' and lookup('env', 'YC_CLOUD_ID') != '' and lookup('env', 'YC_FOLDER_ID') != ''
-
     - name: Prepare TF (set yandex mirror)
       copy:
         src: "{{ terraform_rc_path }}"
         dest: ~/.terraformrc
 
-    # Используем переменные окружения Jenkins напрямую с terraform
     - name: Run terraform
+      environment:
+        TF_VAR_user_name: "{{ lookup('env', 'TF_VAR_user_name') }}"
+        TF_VAR_password: "{{ lookup('env', 'TF_VAR_password') }}"
       terraform:
         project_path: "{{ terraform_path }}"
         force_init: yes
         state: present
       register: trfrm
-      environment:
-        YC_TOKEN: "{{ lookup('env', 'YC_TOKEN') }}"
-        YC_CLOUD_ID: "{{ lookup('env', 'YC_CLOUD_ID') }}"
-        YC_FOLDER_ID: "{{ lookup('env', 'YC_FOLDER_ID') }}"
 
     - name: Export server IP up
       lineinfile:
@@ -98,7 +44,7 @@
   tasks:
     - name: Wait for a ssh port become available
       wait_for:
-        host: "{{ hostvars.localhost.trfrm.outputs.servers.value.serverip }}"
+        host: "{{ trfrm.outputs.servers.value.serverip }}"
         port: 22
 
 - name: Prepare production for deploy
