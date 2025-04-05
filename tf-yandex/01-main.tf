@@ -77,7 +77,7 @@ resource "yandex_vpc_security_group" "group1" {
   description = "Security group for Ivanov VM"
 }
 
-# Создание правила для SSH (исправленная версия)
+# Создание правила для SSH
 resource "yandex_vpc_security_group_rule" "ssh-rule" {
   security_group_binding = yandex_vpc_security_group.group1.id 
   direction         = "ingress"
@@ -85,6 +85,14 @@ resource "yandex_vpc_security_group_rule" "ssh-rule" {
   protocol          = "TCP"
   port              = 22
   v4_cidr_blocks    = ["0.0.0.0/0"] 
+}
+
+resource "yandex_vpc_security_group_rule" "egress-all" {
+  security_group_binding = yandex_vpc_security_group.group1.id
+  direction         = "egress"
+  description       = "Allow all outgoing traffic"
+  protocol          = "ANY"
+  v4_cidr_blocks    = ["0.0.0.0/0"]
 }
 
 # Вывод IP-адресов
