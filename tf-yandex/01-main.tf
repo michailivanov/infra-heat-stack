@@ -11,20 +11,12 @@ terraform {
   required_version = ">= 0.13"
 }
 
+# Настройка провайдера Yandex Cloud
 provider "yandex" {
   token     = var.yc_token
   cloud_id  = var.yc_cloud_id
   folder_id = var.yc_folder_id
   zone      = "ru-central1-a"
-}
-
-# Настройка провайдера Yandex Cloud
-provider "yandex" {
-  # Используем данные, полученные из внешнего скрипта yc_vars.sh
-  token     = data.external.ya_auth.result.token     # OAuth-токен или IAM-токен
-  cloud_id  = data.external.ya_auth.result.cloud_id  # Идентификатор облака
-  folder_id = data.external.ya_auth.result.folder_id # Идентификатор каталога
-  zone      = "ru-central1-a"                        # Зона по умолчанию
 }
 
 # Создание загрузочного диска для виртуальной машины
