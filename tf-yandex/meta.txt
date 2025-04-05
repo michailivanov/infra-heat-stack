@@ -1,4 +1,4 @@
-# cloud-config
+#cloud-config
 users:
   - name: ubuntu
     groups: sudo
