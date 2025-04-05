@@ -48,6 +48,7 @@ resource "yandex_compute_instance" "vm-1" {
   network_interface {
     subnet_id = yandex_vpc_subnet.subnet-1.id  # Подключаем к созданной подсети
     nat       = true                           # Включаем NAT для выхода в интернет
+    security_group_ids = [yandex_vpc_security_group.group1.id]
   }
 
   # Метаданные ВМ
