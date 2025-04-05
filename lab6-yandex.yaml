@@ -73,14 +73,25 @@
     terraform_path: tf
   tasks:
     - block:
+      - name: Update apt cache
+        apt:
+          update_cache: yes
+        become: yes
+        async: 300  # 5 минут максимум
+        poll: 5     # Проверка каждые 5 секунд
+        
       - name: Install Node.js and npm
         apt:
           name:
             - nodejs
             - npm
           state: present
-          update_cache: yes
         become: yes
+        timeout: 600  # 10 минут на выполнение
+        register: node_install
+        until: node_install is succeeded  # Повторять при ошибках
+        retries: 3
+        delay: 30
 
       - name: Install LocalTunnel globally
         npm:
