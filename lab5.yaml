@@ -54,6 +54,12 @@
     terraform_path: tf
   tasks:
     - block:
+      - name: Update apt cache
+        apt:
+          update_cache: yes
+        become: yes
+        async: 300  # 5 минут максимум
+        
       - name: Install Node.js and npm
         apt:
           name:
