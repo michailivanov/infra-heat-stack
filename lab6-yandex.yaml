@@ -79,16 +79,15 @@
         become: yes
         async: 300  # 5 минут максимум
         
-      - name: Download NodeSource GPG key
-        ansible.builtin.get_url:
+      - name: Add NodeSource GPG key
+        apt_key:
           url: https://deb.nodesource.com/gpgkey/nodesource.gpg.key
-          dest: /usr/share/keyrings/nodesource.gpg
-          mode: '0644'
+          state: present
         become: yes
       
       - name: Add NodeSource APT repository
         ansible.builtin.apt_repository:
-          repo: "deb [signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_18.x {{ ansible_distribution_release }} main"
+          repo: "deb https://deb.nodesource.com/node_18.x {{ ansible_distribution_release }} main"
           state: present
           filename: nodesource
         become: yes
