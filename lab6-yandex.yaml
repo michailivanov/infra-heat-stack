@@ -97,20 +97,18 @@
           update_cache: yes
         become: yes
         async: 300  # 5 минут максимум
-        
-      - name: Install Node.js and npm
+
+      - name: Install Node.js
         apt:
-          name:
-            - nodejs
-            - npm
+          name: nodejs
           state: present
         become: yes
         timeout: 600  # 10 минут на выполнение
         register: node_install
-        until: node_install is succeeded  # Повторять при ошибках
+        until: node_install is succeeded
         retries: 3
         delay: 30
-
+        
       - name: Install LocalTunnel globally
         npm:
           name: localtunnel
