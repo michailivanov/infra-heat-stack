@@ -73,16 +73,19 @@
     terraform_path: tf
   tasks:
     - block:
-      - name: Add NodeSource APT repository for Node.js 18
-        apt_key:
+      - name: Download NodeSource GPG key
+        ansible.builtin.get_url:
           url: https://deb.nodesource.com/gpgkey/nodesource.gpg.key
-          state: present
-
-      - name: Add Node.js repository
-        apt_repository:
-          repo: deb https://deb.nodesource.com/node_18.x {{ ansible_distribution_release }} main
+          dest: /usr/share/keyrings/nodesource.gpg
+          mode: '0644'
+        become: yes
+      
+      - name: Add NodeSource APT repository
+        ansible.builtin.apt_repository:
+          repo: "deb [signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_18.x {{ ansible_distribution_release }} main"
           state: present
           filename: nodesource
+        become: yes
     
       - name: Update apt cache
         apt:
