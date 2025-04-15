@@ -73,6 +73,12 @@
     terraform_path: tf
   tasks:
     - block:
+      - name: Update apt cache
+        apt:
+          update_cache: yes
+        become: yes
+        async: 300  # 5 минут максимум
+        
       - name: Download NodeSource GPG key
         ansible.builtin.get_url:
           url: https://deb.nodesource.com/gpgkey/nodesource.gpg.key
