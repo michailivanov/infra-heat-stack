@@ -78,6 +78,11 @@
           update_cache: yes
         become: yes
         async: 300  # 5 минут максимум
+
+      - name: Add NodeSource APT repository
+        shell: curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+        args:
+          executable: /bin/bash
         
       - name: Install Node.js and npm
         apt:
