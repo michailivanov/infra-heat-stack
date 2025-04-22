@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ivanov-db
+  namespace: ivanov-ns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ivanov-db
+  template:
+    metadata:
+      labels:
+        app: ivanov-db
+    spec:
+      containers:
+      - name: postgres
+        image: cr.yandex/crp0r20ste42tqg4q7ep/currency_converter-db:latest
+        env:
+        - name: POSTGRES_PASSWORD
+          value: "424242"
+        - name: POSTGRES_DB
+          value: "currency_converter"
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: db-data
+          mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: db-data
+        emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+  namespace: ivanov-ns
+spec:
+  selector:
+    app: ivanov-db
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
