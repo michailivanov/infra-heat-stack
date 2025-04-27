@@ -18,4 +18,4 @@ COPY CurrencyConverterBot-1.0-SNAPSHOT-jar-with-dependencies.jar /app/app.jar
 EXPOSE 8081
 
 # Запускаем бот и LocalTunnel
-CMD ["sh", "-c", "java -jar /app/app.jar & lt --port 8081 --subdomain currency-bot"]
+CMD ["sh", "-c", "lt --port 8081 --subdomain currency-bot & sleep 10 && java -jar app.jar"]
