@@ -17,7 +17,7 @@ spec:
       - name: bot
         image: cr.yandex/crp0r20ste42tqg4q7ep/currency-bot:latest
         ports:
-        - containerPort: 8080
+        - containerPort: 8081
 
 ---
 apiVersion: v1
@@ -32,4 +32,4 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 8080
+      targetPort: 8081
