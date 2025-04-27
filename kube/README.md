@@ -36,18 +36,15 @@ kubectl apply -f currency-bot.yaml
 
 kubectl get pods -n ivanov-ns
 
-kubectl logs -l app=ivanov-bot -n ivanov-ns --tail=100
-
-kubectl exec -it <pod> -n ivanov-ns -- \
-  sh -c "apt-get update && apt-get install -y postgresql-client && \
-  psql -h db -U postgres -d currency_converter -c '\dt'"
+kubectl logs -l app=ivanov-bot -n ivanov-ns
 
 kubectl delete -f database.yaml -f currency-bot.yaml
 ```
 
 ```
-docker run -p 8081:8081 currency-bot:localtunnel
+kubectl get pods -n ivanov-ns 
 
-docker tag currency-bot:localtunnel michailivanov/currency-converter-bot:latest
-docker push michailivanov/currency-converter-bot:latest
+kubectl exec -it ivanov-bot-74c7f78fb4-pnzqv -n ivanov-ns -- sh
+
+kubectl logs ivanov-bot-74c7f78fb4-pnzqv -n ivanov-ns
 ```
